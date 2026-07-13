@@ -1,6 +1,9 @@
 import ChatWidget from "@/components/ChatWidget";
+import { practice } from "@/lib/practice";
 
 export default function Home() {
+  const gallery = practice.testimonials.filter((t) => t.image);
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#EFF5F4] to-white">
       {/* Fake practice site behind the widget, so the demo looks real */}
@@ -41,6 +44,26 @@ export default function Home() {
         <p className="mx-auto mt-10 max-w-md text-xs text-ink/40">
           Demo tip: try "How much are braces and can I come Saturday?" — watch it answer and book.
         </p>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-6 pb-24">
+        <h2 className="text-center text-2xl font-bold text-brand">Real patient results</h2>
+        <p className="mx-auto mt-2 max-w-xl text-center text-sm text-ink/60">
+          The same testimonials the chat widget shares when a patient has questions before booking.
+        </p>
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {gallery.map((t) => (
+            <div key={t.topic} className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={t.image} alt={`${t.topic} before and after`} className="h-48 w-full object-cover" />
+              <div className="p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-brand/70">{t.topic}</p>
+                <p className="mt-1.5 text-sm italic text-ink/70">"{t.quote}"</p>
+                <p className="mt-2 text-xs font-medium text-ink/50">— {t.author}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       <ChatWidget />

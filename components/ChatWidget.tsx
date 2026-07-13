@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; image?: string };
 type Booking = { name: string; phone: string; reason: string; preferredTime: string };
 
 const WELCOME = "Hi! Welcome to Bright Smile Dental 👋 I can help with our services, pricing, hours, or booking a free consultation. What can I help you with?";
@@ -20,6 +20,16 @@ export default function ChatWidget() {
   async function send(text: string) {
     const content = text.trim();
     if (!content || loading) return;
+    // Only open the booking form when the CUSTOMER explicitly asks to book —
+    // either directly, or by affirming a booking offer the assistant just made.
+    // (Previously this matched keywords in the assistant's own reply, which
+    // fired on incidental words like "details" or "grab a few" in any reply.)
+    const lastAssistantMsg = messages[messages.length - 1];
+    const wasOffered = lastAssistantMsg?.role === "assistant" && /book|consultation|schedule|grab a few/i.test(lastAssistantMsg.content);
+    const userWantsBooking =
+      /\b(book|appointment|schedule me|sign me up)\b/i.test(content) ||
+      (wasOffered && /^(yes|yeah|yep|sure|ok|okay|please|sounds good|let'?s do it)\b/i.test(content));
+
     const next = [...messages, { role: "user" as const, content }];
     setMessages(next);
     setInput("");
@@ -31,9 +41,8 @@ export default function ChatWidget() {
         body: JSON.stringify({ messages: next }),
       });
       const data = await res.json();
-      setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
-      // If the assistant is inviting a booking, reveal the form.
-      if (/book|booking form|details|schedule you|grab a few/i.test(data.reply)) {
+      setMessages((m) => [...m, { role: "assistant", content: data.reply, image: data.image }]);
+      if (userWantsBooking) {
         setTimeout(() => setShowBooking(true), 400);
       }
     } catch {
@@ -73,11 +82,15 @@ export default function ChatWidget() {
       {/* Messages */}
       <div className="flex-1 space-y-3 overflow-y-auto bg-[#F7FAFA] px-4 py-4">
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+          <div key={i} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
             <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
               m.role === "user" ? "rounded-br-md bg-brand text-white" : "rounded-bl-md bg-white text-ink shadow-sm ring-1 ring-black/5"}`}>
               {m.content}
             </div>
+            {m.image && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={m.image} alt="Patient before and after" className="mt-1.5 h-32 w-full max-w-[80%] rounded-xl object-cover shadow-sm ring-1 ring-black/5" />
+            )}
           </div>
         ))}
 
