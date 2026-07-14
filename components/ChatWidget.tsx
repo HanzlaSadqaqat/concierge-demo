@@ -22,10 +22,18 @@ export default function ChatWidget() {
     if (!content || loading) return;
     // Only open the booking form when the CUSTOMER explicitly asks to book —
     // either directly, or by affirming a booking offer the assistant just made.
-    // (Previously this matched keywords in the assistant's own reply, which
-    // fired on incidental words like "details" or "grab a few" in any reply.)
+    // "wasOffered" requires the assistant's last message to be an actual
+    // booking QUESTION (ends in "?" and mentions booking/consultation), not
+    // just any reply that happens to contain the word "book" or "consultation"
+    // somewhere — almost every reply does that, since the system prompt has
+    // the bot end most answers with some kind of booking nudge. Without the
+    // "ends in ?" requirement, a bare "yes"/"sure" to an unrelated question
+    // would incorrectly pop the form.
     const lastAssistantMsg = messages[messages.length - 1];
-    const wasOffered = lastAssistantMsg?.role === "assistant" && /book|consultation|schedule|grab a few/i.test(lastAssistantMsg.content);
+    const wasOffered =
+      lastAssistantMsg?.role === "assistant" &&
+      /\?\s*$/.test(lastAssistantMsg.content.trim()) &&
+      /book|schedule|consultation|get you in/i.test(lastAssistantMsg.content);
     const userWantsBooking =
       /\b(book|appointment|schedule me|sign me up)\b/i.test(content) ||
       (wasOffered && /^(yes|yeah|yep|sure|ok|okay|please|sounds good|let'?s do it)\b/i.test(content));

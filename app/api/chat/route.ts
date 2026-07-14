@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
         tools: [
           {
             name: "send_reply",
-            description: "Send the reply message to show the patient in the chat widget.",
+            description:
+              "Send the reply message to show the patient in the chat widget.",
             input_schema: {
               type: "object",
               properties: { reply: { type: "string" } },
@@ -77,7 +78,9 @@ export async function POST(req: NextRequest) {
       });
     }
     const data = await res.json();
-    const toolUse = data?.content?.find((c: { type: string }) => c.type === "tool_use");
+    const toolUse = data?.content?.find(
+      (c: { type: string }) => c.type === "tool_use",
+    );
     const reply = toolUse?.input?.reply ?? "Sorry, could you rephrase that?";
     return NextResponse.json({ reply, image: findTestimonialImage(reply) });
   } catch {
