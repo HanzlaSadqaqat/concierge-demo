@@ -91,7 +91,7 @@ export default function ChatWidget() {
       <div className="flex-1 space-y-3 overflow-y-auto bg-[#F7FAFA] px-4 py-4">
         {messages.map((m, i) => (
           <div key={i} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+            <div className={`max-w-[80%] whitespace-pre-line rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
               m.role === "user" ? "rounded-br-md bg-brand text-white" : "rounded-bl-md bg-white text-ink shadow-sm ring-1 ring-black/5"}`}>
               {m.content}
             </div>
